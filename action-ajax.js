@@ -1,7 +1,7 @@
 /*
- * Action Ajax v1.2
+ * Action Ajax v1.9
  * @author: Harcharan Singh
- * @version 1.7
+ * @version 1.9.2
  * @git: https://github.com/artisangang/action-ajax
  */
 if ("undefined" === typeof jQuery)
@@ -42,7 +42,8 @@ if ("undefined" === typeof jQuery)
             logError: false,
             errorIDPrefix: '',
             objectIdenty: '',
-            data: {}
+            data: {},
+            response: {}
         };
 
         // if has params load into object
@@ -111,6 +112,7 @@ if ("undefined" === typeof jQuery)
                 processData: actionAjaxParams.processData,
                 data: actionAjaxParams.sendData,
                 success: function(responce) {
+                    actionAjaxParams.response = responce;
                     // remove old alert container
                     $(actionAjaxParams.alertContainer).remove();
                     // empty help block

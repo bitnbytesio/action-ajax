@@ -7,8 +7,7 @@
 if ("undefined" === typeof jQuery)
     throw new Error("Action Ajax JavaScript requires jQuery to work");
 
-;
-(function($, window, document, undefined)
+;(function($, window, document, undefined)
 {
     var aa_lastObject = false;
     var aa_currentObject = null;

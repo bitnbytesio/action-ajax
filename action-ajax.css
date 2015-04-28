@@ -1,0 +1,76 @@
+/*
+ * Action Ajax v2
+ * @author: Harcharan Singh <artisangang@gmail.com>
+ * @version 2
+ * @git: https://github.com/artisangang/action-ajax
+ */
+
+
+.action-ajax-loader {
+    background-image: url("ajax-loader.gif");
+    background-repeat: no-repeat;
+    float: left;
+    width: 24px;
+    height: 24px;
+}
+
+/* alerts */
+
+.alert {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.alert-warning {
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+  color: #8a6d3b;
+}
+
+.alert-danger {
+  background-color: #f2dede;
+  border-color: #ebccd1;
+  color: #a94442;
+}
+
+.alert-info {
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+  color: #31708f;
+}
+
+.alert-success {
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+  color: #3c763d;
+}
+
+.alert-dismissable, .alert-dismissible {
+  padding-right: 35px;
+}
+
+.close {
+  color: #000;
+  float: right;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.2;
+  text-shadow: 0 1px 0 #fff;
+}
+
+button.close {
+  background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+  border: 0 none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.alert-dismissable .close, .alert-dismissible .close {
+  color: inherit;
+  position: relative;
+  right: -21px;
+  top: -2px;
+}

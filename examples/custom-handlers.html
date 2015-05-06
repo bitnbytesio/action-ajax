@@ -1,0 +1,118 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="csrf-token" content="qwertyuiop" />
+		<title>Custom Handlers - Action Ajax 2</title>
+		<link href="../action-ajax.css" rel="stylesheet" type="text/css" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+        <h1>Custom handlers <span id="cusLoader"></span></h1>
+        
+        <div id="results">
+            your progress will be shown here. On success, html will be replace with raw html.
+        </div>
+        
+       
+		<form id="sampleForm" enctype="multipart/form-data">
+        
+            <input type="hidden" name="customHandlers" value="ture">
+        
+			<div class="form-group">
+				<label class="col-md-4">Name<label>
+					<div class="col-md-8">
+						<input type="text" name="name">
+						<div class="help-block"></div>
+					</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-4">Email<label>
+					<div class="col-md-8">
+						<input type="text" name="email">
+						<div class="help-block"></div>
+					</div>
+			</div>
+            
+            <div class="form-group">
+				<label class="col-md-4">Picture<label>
+					<div class="col-md-8">
+						<input type="file" name="file">
+						<div class="help-block"></div>
+					</div>
+			</div>
+            
+			<div class="form-group">
+				<label class="col-md-4">&nbsp;<label>
+					<div class="col-md-8">
+						<input type="submit" >
+					</div>
+			</div>
+
+		</form>
+        
+       
+	</body>
+	<script src="../jquery-1.11.2.min.js"></script>
+	<script src="../action-ajax.js"></script>
+	<script>
+		var dot = 1;	
+        var cusLoader;
+        
+		$("#sampleForm").actionAjax({
+            url:"http://localhost/action-ajax/json/index.php",
+            method:"post",
+            reset:true,
+            container:"#results",
+            raw: true,
+            loader: function(event) {
+            
+                if (event === "show") {
+                   
+                    
+                   
+                    cusLoader = setInterval(function(){
+                    dotes = "";
+                    for(i=0; i<= dot; i++) {
+                        dotes += "*";
+                    }
+                    $("#cusLoader").html(dotes);
+                    dot = dot + 1;
+                    
+                    if (dot > 7) {
+                        dot = 1;
+                    }
+                    
+                    },100);
+                   
+                }
+                
+                if (event === "hide") {
+                    $("#cusLoader").html(" Completed!");
+                    clearInterval(cusLoader);
+                }
+            
+            },
+            progress: function(completed) {
+                $("#results").html(completed + " % completed, please wait.");
+            },
+            autoRemoveAlert: false,
+            after: function() {
+                alert("After callback: Request completed");
+            },
+            before: function() {
+                alert("Before callback: Just dispatched");
+            },
+            success: function() {
+                alert("Success callback: Successfully completed");
+            },
+            fail: function() {
+                alert("Fail alert: We are sorry, request failed due to some error");
+            },
+        });
+	
+
+	</script>
+</html>

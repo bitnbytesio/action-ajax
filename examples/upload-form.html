@@ -1,0 +1,53 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="csrf-token" content="qwertyuiop" />
+		<title>File Upload - Action Ajax 2</title>
+		<link href="../action-ajax.css" rel="stylesheet" type="text/css" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+    
+<div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+        <span class="sr-only">0% Complete</span>
+    </div>
+</div>
+
+        <h1>Upload File</span></h1>
+        
+        <div id="results">
+        </div>
+        
+        <h2>Form testing</h2>
+		<form action="http://localhost/action-ajax/json/index.php" method="post" id="sampleForm" data-container="#results" data-reset="true" enctype="multipart/form-data">
+            
+            <input type="hidden" name="uploadFile" value="true">
+            
+			<div class="form-group">
+				<label class="col-md-4">Upload<label>
+					<div class="col-md-8">
+						<input type="file" name="file">
+						<div class="help-block"></div>
+					</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-4">&nbsp;<label>
+					<div class="col-md-8">
+						<input type="submit" value="upload">
+					</div>
+			</div>
+
+		</form>
+      
+	</body>
+	<script src="../jquery-1.11.2.min.js"></script>
+	<script src="../action-ajax.js"></script>
+	<script>
+		
+		$("#sampleForm").actionAjax();
+		
+	</script>
+</html>

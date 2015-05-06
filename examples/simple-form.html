@@ -1,0 +1,64 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="csrf-token" content="qwertyuiop" />
+		<title>Simple Form - Action Ajax 2</title>
+		<link href="../action-ajax.css" rel="stylesheet" type="text/css" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+        <h1>Action Ajax 2</h1>
+        
+        <div id="results">
+        </div>
+        
+        <h2>Sample Form</h2>
+		<form action="http://localhost/action-ajax/json/index.php" method="post" id="sampleForm" data-container="#results" data-reset="true">
+            
+            <input type="hidden" name="sampleForm" value="Sample Form Test">
+            
+			<div class="form-group">
+				<label class="col-md-4">Name<label>
+					<div class="col-md-8">
+						<input type="text" name="name">
+						<div class="help-block"></div>
+					</div>
+			</div>
+            
+            <div class="form-group">
+				<label class="col-md-4">Age<label>
+					<div class="col-md-8">
+						<input type="text" name="age">
+						<div class="help-block"></div>
+					</div>
+			</div>
+            
+			<div class="form-group">
+				<label class="col-md-4">Email<label>
+					<div class="col-md-8">
+						<input type="text" name="email">
+						<div class="help-block"></div>
+					</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-4">&nbsp;<label>
+					<div class="col-md-8">
+						<input type="submit" value="Submit" >
+					</div>
+			</div>
+
+		</form>
+        
+       
+	</body>
+	<script src="../jquery-1.11.2.min.js"></script>
+	<script src="../action-ajax.js"></script>
+	<script>
+	
+		$("#sampleForm").actionAjax();
+
+	</script>
+</html>

@@ -1,218 +1,236 @@
 /*
  * Action Ajax v2
  * @author: Harcharan Singh <artisangang@gmail.com>
- * @version 2
+ * @version 2.2
  * @git: https://github.com/artisangang/action-ajax
  */
 
-;(function($, window, document, undefined){
+;
+(function ($, window, document, undefined) {
 
-	var actionAjax = actionAjax || {};
+    var actionAjax = actionAjax || {};
 
-	// global config
-	var __actionAjax_globals = {
-		
-		queue: false,
-		multiple_requests: true,
-		busy: function() {
-			alert("Please wait while application is busy.");
-		},
-		defaults: {
-				url: "",
-				method: "get",
-				cache: false,
-				processData: true,
-				headers:{},
-				raw: false,
-				trigger: "click",
-				reset: true,
-				element: null,
-				data: {},
-				response: null,
-				alertClass: "alert",
-				autoRemoveAlert: 10000,
-				container: "#action-ajax-container",
-				loader: {class: "action-ajax-loader", element: null},
-				messageContainer: null,
-				append: false,
-				contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
-				after: function() {},
-				before: function() {},
-				success: function() {},
-				fail: function() {},
-				progress: ".progress",
-				messenger: false,
-				errorbag: false, 
-				debug: false
-				
-			}
-		
-	};
+    // global config
+    var __actionAjax_globals = {
 
-	// is busy or not
-	var __actionAjax_working = false;
+        queue: false,
+        multiple_requests: true,
+        busy: function () {
+            alert("Please wait while application is busy.");
+        },
+        defaults: {
+            url: "",
+            method: "get",
+            cache: false,
+            processData: true,
+            headers: {},
+            raw: false,
+            trigger: "click",
+            reset: true,
+            element: null,
+            data: {},
+            response: null,
+            alertClass: "alert",
+            autoRemoveAlert: 10000,
+            container: "#action-ajax-container",
+            loader: {class: "action-ajax-loader", element: null},
+            messageContainer: null,
+            append: false,
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            after: function () {
+            },
+            before: function () {
+            },
+            success: function () {
+            },
+            fail: function () {
+            },
+            progress: ".progress",
+            messenger: false,
+            errorbag: false,
+            debug: false
 
-	// request queue bucket
-	var __actionAjax_queue = [];
-	
-	function actionAjax(object, config) {
+        }
 
-		// get global options
-		var defaults = __actionAjax_globals.defaults;
+    };
 
-		// set current object
-		defaults.element = object;
+    // is busy or not
+    var __actionAjax_working = false;
 
-		// extends config with final options
-		this.config = $.extend({}, defaults, config);
+    // request queue bucket
+    var __actionAjax_queue = [];
 
-		this.__temp = {};
-		
-		// create object identity
-		this.__identity = str_rand(10);
-		
+    function actionAjax(object, config) {
 
-		// bind action ajax event
-		this.bind(object);
-	
-	}
+        // get global options
+        var defaults = __actionAjax_globals.defaults;
 
-	actionAjax.prototype.bind = function(object) {
+        var objectIdentity = object;
 
-		var instanse = this;
-		var config = this.config;
+        if (typeof $(object).attr('id') !== 'undefined') {
+            objectIdentity = "#" + $(object).attr('id');
+        }
 
-		instanse.__temp.isForm = false;
+        // set current object
+        defaults.element = objectIdentity;
 
-		// if object is form bind on submit event
-		if($(object).is("form")) {
+        // extends config with final options
+        this.config = $.extend({}, defaults, config);
 
-			instanse.__temp.isForm = true;
+        this.__temp = {};
 
-			$(object).on("submit", function(e) {
-
-				e.preventDefault();
-
-				// set loader element for form
-				if (typeof config.loader.element !== "undefined") {
-					config.loader.element = $(object).find(":submit");
-
-				}
-
-				config.url = $(object).attr('action') ? $(object).attr('action') : config.url;
-        		config.method = $(object).attr('method') ? $(object).attr('method') : config.method;
-        		config.container = $(object).data('container') ? $(object).data('container') : config.container;
-        		config.reset = $(object).data('reset') ? $(object).data('reset') : config.reset;
-        		
-        		if ($(object).attr("enctype") === "multipart/form-data") {
-	                config.contentType = false;
-	                config.processData = false;
-	                config.data = new FormData($(object)[0]);
-	            } else {
-	                config.data = $(object).serialize();
-	            }
-
-	            instanse.call();
-
-	            return false;
-
-			});
-
-		} 
-		// otherwise check for trigger
-		else if(config.trigger !== false) {
-
-			$(object).on(config.trigger, function(e) {
-
-				e.preventDefault();
-
-				// set loader element for any tag
-				if (typeof config.loader.element !== "undefined") {
-					config.loader.element = $(object);
-				}
-
-				config.data = $.extend({}, config.data, $(object).data());
-
-				 instanse.call();
-
-				 return false;
-
-			});
-
-		} 
-		// if trigger is set false
-		else {
-
-			if (typeof config.loader.element === "undefined") {
-					config.loader.element = $(object);
-			}
-
-			config.data = $.extend({}, config.data, $(object).data());
-
-			 instanse.call();
-
-			 return false;
-		}
-
-	};
-
-	actionAjax.prototype.loader = function(option) {
+        // create object identity
+        this.__identity = str_rand(10);
 
 
-		if (option === "show") {
+        // bind action ajax event
+        this.bind(defaults.element);
 
-	    	if (typeof this.config.loader === "function") {
-				var loader = this.config.loader;
-				loader("show", this.config);
-			}
+    }
 
-			if (typeof this.config.loader.class !== "undefined") {
-				var loader_class = this.config.loader.class;
-				var loader_element = this.config.loader.element;
-				var loader_html = '<span class="' + loader_class + '"></span>';
-				$(loader_element).parent().append(loader_html);
-			}
-		}
+    actionAjax.prototype.bind = function (object) {
 
-		if (option === "hide") {
+        var instanse = this;
+        var config = this.config;
+        var object = object;
 
-	    	if (typeof this.config.loader === "function") {
-				var loader = this.config.loader;
-				loader("hide", this.config);
-			}
+        instanse.__temp.isForm = false;
 
-			if (typeof this.config.loader.class !== "undefined") {
-				var loader_class = this.config.loader.class;
-				var loader_element = this.config.loader.element;
-				$("." + loader_class).remove();
-			}
-		}
+        // if object is form bind on submit event
+        if ($(object).is("form") && config.trigger === true) {
 
-	};
+            instanse.__temp.isForm = true;
 
-	actionAjax.prototype.progress = function(completed) {
+            $(document).on("submit", object, function (e) {
 
-		var config = this.config;
+                e.preventDefault();
 
-		if (typeof config.progress === "function") {
-			var func = config.progress;
-			func(completed);
-		} else {
-			  $(config.progress).find('.progress-bar').css("width", completed + "%");
-              $(config.progress).find('.progress-bar').attr("aria-valuenow", completed);
-              $(config.progress).find('.progress-bar > span').html(completed + "% completed...");
-		}
+                // set loader element for form
+                if (typeof config.loader.element !== "undefined") {
+                    config.loader.element = $(object).find(":submit");
 
-	};
+                }
 
-	actionAjax.prototype.messenger = function(message) {
+                config.url = $(object).attr('action') ? $(object).attr('action') : config.url;
+                config.method = $(object).attr('method') ? $(object).attr('method') : config.method;
+                config.container = $(object).data('container') ? $(object).data('container') : config.container;
+                config.reset = $(object).data('reset') ? $(object).data('reset') : config.reset;
 
-		var config = this.config;
-		
-		var message_text = message.text;
+                if ($(object).attr("enctype") === "multipart/form-data") {
+                    config.contentType = false;
+                    config.processData = false;
+                    config.data = new FormData($(object)[0]);
+                } else {
+                    config.data = $(object).serialize();
+                }
+
+                instanse.call();
+
+                return false;
+
+            });
+
+        }
+        // otherwise check for trigger
+        else if (config.trigger !== false) {
+
+            $(object).on(config.trigger, function (e) {
+
+                e.preventDefault();
+
+                // set loader element for any tag
+                if (typeof config.loader.element !== "undefined") {
+                    config.loader.element = $(object);
+                }
+
+                config.data = $.extend({}, config.data, $(object).data());
+                config.container = $(object).data('container') ? $(object).data('container') : config.container;
+
+                instanse.call();
+
+                return false;
+
+            });
+
+        }
+        // if trigger is set false
+        else {
+
+            if (typeof config.loader.element === "undefined") {
+                config.loader.element = $(object);
+            }
+
+            if (typeof config.data === "object") {
+                config.data = $.extend({}, config.data, $(object).data());
+            }
+
+            config.container = $(object).data('container') ? $(object).data('container') : config.container;
+
+            instanse.call();
+
+            return false;
+        }
+
+    };
+
+    actionAjax.prototype.loader = function (option) {
+
+
+        if (option === "show") {
+
+            if (typeof this.config.loader === "function") {
+                var loader = this.config.loader;
+                loader("show", this.config);
+            }
+
+            if (typeof this.config.loader.class !== "undefined") {
+                var loader_class = this.config.loader.class;
+                var loader_element = this.config.loader.element;
+                var loader_html = '<span class="' + loader_class + '"></span>';
+                $(loader_element).parent().append(loader_html);
+            }
+        }
+
+        if (option === "hide") {
+
+            if (typeof this.config.loader === "function") {
+                var loader = this.config.loader;
+                loader("hide", this.config);
+            }
+
+            if (typeof this.config.loader.class !== "undefined") {
+                var loader_class = this.config.loader.class;
+                var loader_element = this.config.loader.element;
+                $("." + loader_class).remove();
+            }
+        }
+
+    };
+
+    actionAjax.prototype.progress = function (completed) {
+
+        var config = this.config;
+
+        if (typeof config.progress === "function") {
+            var func = config.progress;
+            func(completed);
+        } else {
+
+            $(config.progress).find('.progress-bar').css("width", completed + "%");
+            $(config.progress).find('.progress-bar').attr("aria-valuenow", completed);
+            $(config.progress).find('.progress-bar > span').html(completed + "% completed...");
+        }
+
+    };
+
+    actionAjax.prototype.messenger = function (message) {
+
+        var config = this.config;
+
+        var message_text = message.text;
         var message_class = message.class;
-		var alertClass = config.alertClass;
-		var identity = this.__identity;
+        var alertClass = config.alertClass;
+        var identity = this.__identity;
         var message_object = '<p class="action-ajax-alert ' + identity + ' ' + alertClass + ' ' + message_class + '">' + message_text + '</p>';
         if (null === config.messageContainer) {
             $(config.element).prepend(message_object);
@@ -221,83 +239,82 @@
             $(config.messageContainer).prepend(message_object);
 
         }
-			
-		if (config.autoRemoveAlert) {
-			
-			setTimeout(function(){
-				
-				$(".action-ajax-alert." + identity).fadeOut(500, function() { 
-				
-				$(this).remove(); 
-				
-				});
-				
-				}, config.autoRemoveAlert);
-		}
-		
-	};
 
-	actionAjax.prototype.processQueue = function() {
+        if (config.autoRemoveAlert) {
 
-		if (__actionAjax_queue.length >= 1) {
+            setTimeout(function () {
 
-			requestNow = __actionAjax_queue[0];
-			__actionAjax_queue = __actionAjax_queue.slice(0,1);
-			instanse = requestNow.request_object;
-			instanse.call(true);
+                $(".action-ajax-alert." + identity).fadeOut(500, function () {
 
-		}
+                    $(this).remove();
 
-	};
-	
-	actionAjax.prototype.call = function(is_queue) {
+                });
 
-		var instanse = this;
-		var config = instanse.config;
-		var object = config.element;
-		var hasErrors = false;
-		var identity = instanse.__identity;
+            }, config.autoRemoveAlert);
+        }
 
-		var is_queue = is_queue || false;
+    };
 
-		if (is_queue === false && __actionAjax_globals.multiple_requests === true && __actionAjax_globals.queue === true) {
-			queueObject = {request_identity:identity, request_object:instanse };
-			__actionAjax_queue.push(queueObject);
-			if (__actionAjax_queue.length >= 1) {
-				return;
-			}
-		}
+    actionAjax.prototype.processQueue = function () {
 
-		if (__actionAjax_globals.multiple_requests === false && __actionAjax_working === true) {
-			busyCallback = __actionAjax_globals.busy;
-			busyCallback();
-			return;
-		}
-		
-		
-		__actionAjax_working = true;
+        if (__actionAjax_queue.length >= 1) {
 
-				
-		// remove previous alert
-		$(".action-ajax-alert." + identity).remove();
-		
-		// show loader
-		instanse.loader("show");
-        
+            requestNow = __actionAjax_queue[0];
+            __actionAjax_queue = __actionAjax_queue.slice(0, 1);
+            instanse = requestNow.request_object;
+            instanse.call(true);
+
+        }
+
+    };
+
+    actionAjax.prototype.call = function (is_queue) {
+
+        var instanse = this;
+        var config = instanse.config;
+        var object = config.element;
+        var hasErrors = false;
+        var identity = instanse.__identity;
+
+        var is_queue = is_queue || false;
+
+        if (is_queue === false && __actionAjax_globals.multiple_requests === true && __actionAjax_globals.queue === true) {
+            queueObject = {request_identity: identity, request_object: instanse };
+            __actionAjax_queue.push(queueObject);
+            if (__actionAjax_queue.length >= 1) {
+                return;
+            }
+        }
+
+        if (__actionAjax_globals.multiple_requests === false && __actionAjax_working === true) {
+            busyCallback = __actionAjax_globals.busy;
+            busyCallback();
+            return;
+        }
+
+
+        __actionAjax_working = true;
+
+
+        // remove previous alert
+        $(".action-ajax-alert." + identity).remove();
+
+        // show loader
+        instanse.loader("show");
+        $(config.progress).show();
+
         var beforeCallback = config.before;
         beforeCallback(config);
 
         var mergedHeadres = $.extend({}, {
-        	"X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
+            "X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
         }, config.headers);
 
-           
         $.ajax({
-            xhr: function()
-            {
+            xhr: function () {
                 // prepare progress bar
                 var xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
+                xhr.upload.addEventListener("progress", function (evt) {
                     if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
                         percentComplete = parseInt(percentComplete * 100);
@@ -314,25 +331,25 @@
             processData: config.processData,
             data: config.data,
             cache: config.cache,
-            success: function(response) {
-                  
+            success: function (response) {
+
                 if ($(object).is("form") && typeof config.errorbag !== "function") {
-                    $(object).find('.has-error').each(function() {
+                    $(object).find('.has-error').each(function () {
 
                         $(this).removeClass('has-error');
                         $(this).find('.help-block').html('');
 
                     });
                 }
-                        
-                
+
+
                 config.response = response;
-                
-                if (config.raw) {
-                	$(config.container).html(response);
+
+                if (config.raw === true) {
+                    $(config.container).html(response);
                 }
-                
-                if (!config.raw) {
+
+                if (config.raw === false) {
 
                     // find errors
                     if (typeof response.errors !== "undefined") {
@@ -345,7 +362,7 @@
 
                             config.errorbag = response.errors;
 
-                            $.each(response.errors, function(key, value) {
+                            $.each(response.errors, function (key, value) {
 
                                 var inputElement = $(config.element).find("[name=" + key + "]");
                                 $(inputElement).next().html(value[0]);
@@ -356,15 +373,14 @@
 
                     } else {
                         // reset form
-                        if (config.reset === true && hasErrors !== false) {
+                        if (config.reset === true && $(object).is("form")) {
                             $(object).trigger("reset");
                         }
-                    }
-                    
-                                
+                    } // error handling end
+
+
                     // change hash
-                    if (typeof response.hash !== "undefined")
-                    {
+                    if (typeof response.hash !== "undefined") {
                         window.location.hash = "!/" + response.hash;
                         return;
                     }
@@ -377,26 +393,28 @@
 
                     // load html if avialable
                     if (typeof response.body !== "undefined") {
-                    
-                        if (config.replace === true) {
+
+                        if (config.append === false) {
                             $(config.container).html(response.body);
                         } else {
                             $(config.container).append(response.body);
                         }
                     }
-				
+
                     // check for message
                     if (typeof response.message !== "undefined") {
 
                         if (typeof config.messenger === "function") {
-                                var messenger = config.messenger;
-                                messenger(response.message);
+                            var messenger = config.messenger;
+                            messenger(response.message);
                         } else {
 
-                           instanse.messenger(response.message);
+                            instanse.messenger(response.message);
                         }
                     }
-                }
+
+                } // process json
+
                 // run on success function
                 if (typeof config.success === 'function') {
                     success = config.success;
@@ -404,15 +422,17 @@
                 }
 
                 return;
-            
-        }
-    }).done(function() {
 
-        	__actionAjax_working = false;
+            }
+        }).done(function () {
 
-        	instanse.loader("hide");
-           
-           instanse.processQueue();
+            __actionAjax_working = false;
+
+            instanse.loader("hide");
+
+            instanse.processQueue();
+
+            $(config.progress).hide();
 
             // run callbak function
             if (typeof config.after === 'function') {
@@ -422,11 +442,11 @@
                 }
             }
 
-        }).fail(function(jqXHR, textStatus, errorThrown) {
+        }).fail(function (jqXHR, textStatus, errorThrown) {
 
-        	__actionAjax_working = false;
+            __actionAjax_working = false;
 
-        	instanse.loader("hide");
+            instanse.loader("hide");
 
             // run on failure function
             if (typeof config.fail === 'function') {
@@ -434,17 +454,17 @@
                 fail(config, instanse);
             }
 
-            var message = {text: "We are sorry, unable to serve requested service.", class:"alert-danger"};
+            var message = {text: "We are sorry, unable to serve requested service.", class: "alert-danger"};
 
-        	if (typeof config.messenger === "function") {
-        			var messenger = config.messenger;
-        			messenger(message);
-        	} else {
+            if (typeof config.messenger === "function") {
+                var messenger = config.messenger;
+                messenger(message);
+            } else {
 
-               instanse.messenger(message);
-        	}
-        
-           
+                instanse.messenger(message);
+            }
+
+
             // log error
             if (config.debug === true) {
                 console.log("fall back:-> " + jqXHR);
@@ -453,50 +473,50 @@
             }
 
         });
-		
-	
-	};
-
-	$.fn.actionAjax = function(params) {
-
-		var list = this;
-		
-		list.each(function(index){
-									
-			var actionAjaxObject = new actionAjax(this, params);
-						
-		});
-		
-	
-	};
-
-	$.actionAjax = function(call, option) {
-
-		var events = {
-
-			about: function() {
-				alert("Action Ajax 2 By git@artisangang  \r\n Author: Harcharan Singh");
-			},
-
-			settings: function(option) {
-				
-				__actionAjax_globals = $.extend({}, __actionAjax_globals, option);
-			},
-
-			options: function(option) {
-				__actionAjax_globals.defaults = $.extend({}, __actionAjax_globals.defaults, option);
-			}
-
-		};
 
 
-		if (typeof events[call] === "function") {
-			var func = events[call];
-			func(option);
-		}
+    };
 
-	};
-	
+    $.fn.actionAjax = function (params) {
+
+        var list = this;
+
+        list.each(function (index) {
+
+            var actionAjaxObject = new actionAjax(this, params);
+
+        });
+
+
+    };
+
+    $.actionAjax = function (call, option) {
+
+        var events = {
+
+            about: function () {
+                alert("Action Ajax 2 By git@artisangang  \r\n Author: Harcharan Singh");
+            },
+
+            settings: function (option) {
+
+                __actionAjax_globals = $.extend({}, __actionAjax_globals, option);
+            },
+
+            options: function (option) {
+                __actionAjax_globals.defaults = $.extend({}, __actionAjax_globals.defaults, option);
+            }
+
+        };
+
+
+        if (typeof events[call] === "function") {
+            var func = events[call];
+            func(option);
+        }
+
+    };
+
 })(window.jQuery || window.Zepto, window, document);
 
 // global function for random string

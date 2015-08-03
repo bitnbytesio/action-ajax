@@ -3,6 +3,8 @@
 
 ActionAjax is usefull for **ajax**  submission of **forms or raw data**. you can perform ajax submission in a single line. you can use action ajax with any technology and platform. it also provide prograss bar. Progress bar will be in bootstrap format. it is fully expandable with parameters. you can change any of the default containers and element selectors. it also support triggers like call before, callback, on success or on failure.
 
+**Note:** if you are on bootstrap, please do not attach action-ajax.css. Css is for demonstrate purpose ony. However you needs css for loading bar. 
+
 ## Requirements
 
 - JQuery >= 1.11

@@ -1,0 +1,14 @@
+{
+  "name": "action-ajax",
+  "homepage": "https://github.com/artisangang/action-ajax",
+  "_release": "a3da231e47",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "a3da231e4799a2fb579de0b0cbfd730c34aa1092"
+  },
+  "_source": "https://github.com/artisangang/action-ajax.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/artisangang/action-ajax.git",
+  "_direct": true
+}

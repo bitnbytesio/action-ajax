@@ -5,8 +5,10 @@
  * @git: https://github.com/artisangang/action-ajax
  */
 
-;
+
 (function ($, window, document, undefined) {
+
+    'use strict';
 
     var actionAjax = actionAjax || {};
 
@@ -18,6 +20,7 @@
         busy: function () {
             alert("Please wait while application is busy.");
         },
+        hooks: {},
         defaults: {
             url: "",
             method: "get",
@@ -49,7 +52,6 @@
             messenger: false,
             errorbag: false,
             debug: false
-
         }
 
     };
@@ -61,6 +63,8 @@
     var __actionAjax_queue = [];
 
     function actionAjax(object, config) {
+
+
 
         // get global options
         var defaults = __actionAjax_globals.defaults;
@@ -90,6 +94,7 @@
 
     actionAjax.prototype.bind = function (object) {
 
+
         var instanse = this;
         var config = this.config;
         var object = object;
@@ -97,38 +102,28 @@
         instanse.__temp.isForm = false;
 
         // if object is form bind on submit event
-        if ($(object).is("form") && config.trigger === true) {
+        if ($(object).is("form") ) {
 
             instanse.__temp.isForm = true;
 
-            $(document).on("submit", object, function (e) {
+            instanse.setupForm(object);
 
-                e.preventDefault();
+            if (config.trigger === true) {
 
-                // set loader element for form
-                if (typeof config.loader.element !== "undefined") {
-                    config.loader.element = $(object).find(":submit");
+                $(document).on("submit", object, function (e) {
 
-                }
+                    e.preventDefault();
 
-                config.url = $(object).attr('action') ? $(object).attr('action') : config.url;
-                config.method = $(object).attr('method') ? $(object).attr('method') : config.method;
-                config.container = $(object).data('container') ? $(object).data('container') : config.container;
-                config.reset = $(object).data('reset') ? $(object).data('reset') : config.reset;
+                    instanse.setupForm(object);
 
-                if ($(object).attr("enctype") === "multipart/form-data") {
-                    config.contentType = false;
-                    config.processData = false;
-                    config.data = new FormData($(object)[0]);
-                } else {
-                    config.data = $(object).serialize();
-                }
+                    instanse.call();
 
+                    return false;
+
+                });
+            } else {
                 instanse.call();
-
-                return false;
-
-            });
+            }
 
         }
         // otherwise check for trigger
@@ -172,6 +167,31 @@
         }
 
     };
+
+    actionAjax.prototype.setupForm = function (object) {
+
+        var instanse = this;
+        var config = instanse.config;
+
+        // set loader element for form
+        if (typeof config.loader.element !== "undefined") {
+            config.loader.element = $(object).find(":submit");
+
+        }
+
+        config.url = $(object).attr('action') ? $(object).attr('action') : config.url;
+        config.method = $(object).attr('method') ? $(object).attr('method') : config.method;
+        config.container = $(object).data('container') ? $(object).data('container') : config.container;
+        config.reset = $(object).data('reset') ? $(object).data('reset') : config.reset;
+
+        if ($(object).attr("enctype") === "multipart/form-data") {
+            config.contentType = false;
+            config.processData = false;
+            config.data = new FormData($(object)[0]);
+        } else {
+            config.data = $(object).serialize();
+        }
+    }
 
     actionAjax.prototype.loader = function (option) {
 
@@ -259,14 +279,35 @@
 
         if (__actionAjax_queue.length >= 1) {
 
-            requestNow = __actionAjax_queue[0];
+            var requestNow = __actionAjax_queue[0];
             __actionAjax_queue = __actionAjax_queue.slice(0, 1);
-            instanse = requestNow.request_object;
+            var instanse = requestNow.request_object;
             instanse.call(true);
 
         }
 
     };
+
+    actionAjax.prototype.processCallbacks = function (callbacks) {
+
+        if (typeof callbacks !== 'undefined' && callbacks.length > 0) {
+
+            for (var index in callbacks) {
+
+                if (typeof callbacks.trigger === 'undefined') {
+                    continue;
+                } else {
+                    var curCall = callbacks.trigger;
+                    var curParams = callbacks.with;
+
+                    curCall(curParams);
+                }
+
+            }
+
+        }
+
+    }
 
     actionAjax.prototype.call = function (is_queue) {
 
@@ -279,7 +320,7 @@
         var is_queue = is_queue || false;
 
         if (is_queue === false && __actionAjax_globals.multiple_requests === true && __actionAjax_globals.queue === true) {
-            queueObject = {request_identity: identity, request_object: instanse };
+            var queueObject = {request_identity: identity, request_object: instanse };
             __actionAjax_queue.push(queueObject);
             if (__actionAjax_queue.length >= 1) {
                 return;
@@ -287,7 +328,7 @@
         }
 
         if (__actionAjax_globals.multiple_requests === false && __actionAjax_working === true) {
-            busyCallback = __actionAjax_globals.busy;
+            var busyCallback = __actionAjax_globals.busy;
             busyCallback();
             return;
         }
@@ -333,6 +374,13 @@
             cache: config.cache,
             success: function (response) {
 
+                if (typeof response.callback !== 'undefined' && typeof response.callback.trigger !== 'undefined' && typeof __actionAjax_globals.hooks[response.callback.trigger] !== 'undefined') {
+                    var actions = __actionAjax_globals.hooks[response.callback.trigger];
+                    for (var index in actions) {
+                        actions[index](response.callback.with)
+                    }
+                }
+
                 if ($(object).is("form") && typeof config.errorbag !== "function") {
                     $(object).find('.has-error').each(function () {
 
@@ -345,8 +393,26 @@
 
                 config.response = response;
 
+                // change hash
+                if (typeof response.hash !== "undefined") {
+                    window.location.hash = "!/" + response.hash;
+                    return;
+                }
+
+                // redirect if avialable
+                if (typeof response.redirect !== "undefined") {
+                    window.location = response.redirect;
+                    return;
+                }
+
+                if (typeof response.refresh === "boolean" && response.refresh == true) {
+                    window.location.reload();
+                    return;
+                }
+
                 if (config.raw === true) {
                     $(config.container).html(response);
+
                 }
 
                 if (config.raw === false) {
@@ -365,7 +431,7 @@
                             $.each(response.errors, function (key, value) {
 
                                 var inputElement = $(config.element).find("[name=" + key + "]");
-                                $(inputElement).next().html(value[0]);
+                                $(inputElement).next('.help-block').html(value[0]);
                                 $(inputElement).parent().before().addClass('has-error');
 
                             });
@@ -379,17 +445,7 @@
                     } // error handling end
 
 
-                    // change hash
-                    if (typeof response.hash !== "undefined") {
-                        window.location.hash = "!/" + response.hash;
-                        return;
-                    }
 
-                    // redirect if avialable
-                    if (typeof response.redirect !== "undefined") {
-                        window.location = response.redirect;
-                        return;
-                    }
 
                     // load html if avialable
                     if (typeof response.body !== "undefined") {
@@ -417,7 +473,7 @@
 
                 // run on success function
                 if (typeof config.success === 'function') {
-                    success = config.success;
+                    var success = config.success;
                     success(response, config);
                 }
 
@@ -436,7 +492,7 @@
 
             // run callbak function
             if (typeof config.after === 'function') {
-                after = config.after;
+                var after = config.after;
                 if (!hasErrors) {
                     after(config, instanse);
                 }
@@ -450,7 +506,7 @@
 
             // run on failure function
             if (typeof config.fail === 'function') {
-                fail = config.fail;
+                var fail = config.fail;
                 fail(config, instanse);
             }
 
@@ -505,6 +561,16 @@
 
             options: function (option) {
                 __actionAjax_globals.defaults = $.extend({}, __actionAjax_globals.defaults, option);
+            },
+
+            hook: function (option) {
+               var hooks =  __actionAjax_globals.hooks;
+
+                if (typeof hooks[option.name] == 'undefined' && typeof option.action !== 'undefined') {
+                    __actionAjax_globals.hooks[option.name] = [options.action];
+                } else if (typeof option.action !== 'undefined') {
+                    __actionAjax_globals.hooks[option.name].push(options.action);
+                }
             }
 
         };
@@ -522,7 +588,7 @@
 // global function for random string
 function str_rand(length) {
     chars = "aA#";
-    mask = '';
+    var mask = '';
     if (chars.indexOf('a') > -1) {
         mask += 'abcdefghijklmnopqrstuvwxyz';
     }

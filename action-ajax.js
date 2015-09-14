@@ -102,7 +102,7 @@
         instanse.__temp.isForm = false;
 
         // if object is form bind on submit event
-        if ($(object).is("form") ) {
+        if ($(object).is("form")) {
 
             instanse.__temp.isForm = true;
 
@@ -320,7 +320,7 @@
         var is_queue = is_queue || false;
 
         if (is_queue === false && __actionAjax_globals.multiple_requests === true && __actionAjax_globals.queue === true) {
-            var queueObject = {request_identity: identity, request_object: instanse };
+            var queueObject = {request_identity: identity, request_object: instanse};
             __actionAjax_queue.push(queueObject);
             if (__actionAjax_queue.length >= 1) {
                 return;
@@ -445,8 +445,6 @@
                     } // error handling end
 
 
-
-
                     // load html if avialable
                     if (typeof response.body !== "undefined") {
 
@@ -564,7 +562,7 @@
             },
 
             hook: function (option) {
-               var hooks =  __actionAjax_globals.hooks;
+                var hooks = __actionAjax_globals.hooks;
 
                 if (typeof hooks[option.name] == 'undefined' && typeof option.action !== 'undefined') {
                     __actionAjax_globals.hooks[option.name] = [options.action];

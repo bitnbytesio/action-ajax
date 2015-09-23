@@ -1,0 +1,130 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="csrf-token" content="qwertyuiop" />
+		<title>Data Attributes - Action Ajax 2</title>
+		<link href="../action-ajax.css" rel="stylesheet" type="text/css" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+        <h1>Action Ajax 2</h1>
+        
+        
+        
+        <h2>ON Click (based on attributes)</h2>
+        <div id="message"></div>
+	       <div style="float:left;width:30%;padding:40px; height:200px">
+          <ul>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="Tab A Content" data-href="tabs/tab-a.html">Tab A</a></li>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="Tab B Content" data-href="tabs/tab-b.html">Tab B</a></li>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="Tab C Content" data-href="tabs/tab-c.html">Tab C</a></li>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="Tab D Content" data-href="tabs/tab-d.html">Tab D</a></li>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="Tab E Content" data-href="tabs/tab-e.html">Tab E</a></li>
+            <li><a href="javascript:void(0)" class="ax-tab" data-title="404 Not found!" data-href="tabs/tab-a.php">I will generate error!</a></li>
+          </ul>
+         </div>
+         <div style="float:left;width:400px;padding:40px;height:200px">
+          <h1 id="content-heading"></h1>
+            <div id="ax-tabs-container-1">
+           </div>
+        </div>
+
+<br><br><br>
+<div class="float:left;clear:both"></div>
+<h1 style="float:left;width :800px">ON Click (based on attributes and unique containers)</h1>
+<hr style="float:left;width :800px">
+<br><br><br>
+        <div style="float:left;width:800px;padding:40px; height:200px">
+          <div id="screen-message">
+          <ul>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-a" data-href="tabs/tab-a.html">Tab A</a>
+              <div id="screen-a">
+
+              </div>
+            </li>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-b" data-href="tabs/tab-b.html">Tab B</a>
+              <div id="screen-b">
+
+              </div>
+            </li>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-c" data-href="tabs/tab-c.html">Tab C</a>
+                   <div id="screen-c">
+
+              </div>
+            </li>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-d" data-href="tabs/tab-d.html">Tab D</a>
+                 <div id="screen-d">
+
+              </div>
+            </li>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-e" data-href="tabs/tab-e.html">Tab E</a>
+                 <div id="screen-e">
+
+              </div>
+            </li>
+            <li><a href="javascript:void(0)" class="ax-screen" data-screen="#screen-f" data-href="tabs/tab-a.php">I will generate error!</a></li>
+          </ul>
+         </div>
+       
+      
+        <br>
+   
+       
+
+	</body>
+	<script src="tabs/jquery.min.js"></script>
+	<script src="../action-ajax.js"></script>
+
+	<script>
+		$(function(){
+
+      $(".ax-tab").on('click', function() {
+
+        var tab_href = $(this).data('href');
+        var tab_title = $(this).data('title');
+
+            $(this).actionAjax({
+                    method: "get",
+                    container:"#ax-tabs-container-1", 
+                    url:"http://localhost/action-ajax/examples/" + tab_href,
+                    trigger:false,
+                    messageContainer: "#message",
+                    raw:true,
+                    success: function() {
+                        $("#content-heading").text(tab_title);
+                    }
+            });
+      });
+
+      $(".ax-screen").on('click', function() {
+
+        var container_screen = $(this).data('screen');
+        var screen_href = $(this).data('href');
+
+            $(this).actionAjax({
+                    method: "get",
+                    container:container_screen, 
+                    url:"http://localhost/action-ajax/examples/" + screen_href,
+                    trigger:false,
+                    messageContainer: "#message",
+                    loader: function(e) {
+                        if (e == "show") {
+                          $(container_screen).html("<strong>Loading please wait...</strong>");
+                        }
+                         if (e == "hide") {
+                         // nothing to do
+                        }
+                    },
+                    raw:true,
+                    success: function() {
+                        $("#content-heading-screen").text(tab_title);
+                    }
+            });
+      });
+
+    });
+ 
+	</script>
+</html>
